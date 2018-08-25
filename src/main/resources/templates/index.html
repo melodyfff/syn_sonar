@@ -1,11 +1,19 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
+    <meta charset="UTF-8"/>
     <title>Title</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script th:src="@{/resource/js/jquery-2.2.0.min.js}" type=text/javascript></script>
+    <script th:src="@{/resource/js/bootstrap.min.js}" type=text/javascript></script>
+    <script type="text/javascript" th:src="@{/home.js}"></script>
+    <link type=text/css media=all th:href="@{resource/css/bootstrap.min.css}" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" th:href="@{resource/css//bootstrap-theme.min.css}"/>
+    <link type=text/css media=all th:href="@{resource/css/bootstrap.min.css}" rel="stylesheet">
 </head>
 <body>
-hello world!
+<div th:replace="page/header"/>
+
+<div th:replace="page/user"/>
+
 </body>
 </html>
