@@ -17,20 +17,20 @@
     </tr>
     </tbody>
 </table>
-<!-- 总页数 -->
-<span th:text="${datas.totalPages}"></span>
-<!-- 每页显示 -->
-<span th:text="${datas.size}"></span>
-<!-- 当前页 -->
-<span th:text="${datas.pageable.pageNumber}"></span>
-
+<!--&lt;!&ndash; 总页数 &ndash;&gt;-->
+<!--<span th:text="${datas.totalPages}"></span>-->
+<!--&lt;!&ndash; 每页显示 &ndash;&gt;-->
+<!--<span th:text="${datas.size}"></span>-->
+<!--&lt;!&ndash; 当前页 &ndash;&gt;-->
+<!--<span th:text="${datas.pageable.pageNumber}"></span>-->
 <script th:inline="javascript">
     var result = [[${datas}]];
     $('#pageLimit').bootstrapPaginator({
         bootstrapMajorVersion: 3,//bootstrap版本
         currentPage: result.pageable.pageNumber==0?1:result.pageable.pageNumber+1,//当前页码
         totalPages: result.totalPages,//总页数（后台传过来的数据）
-        numberOfPages: 5,//一页显示几个按钮
+        search: true, //显示搜索框
+        numberOfPages: 6,//一页显示几个按钮
         itemTexts: function (type, page, current) {
             switch (type) {
                 case "first": return "首页";
