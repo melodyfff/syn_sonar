@@ -30,6 +30,7 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     @Autowired
     private SonarSyncResultRepository sonarSyncResultRepository;
 
+    @Override
     public Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "created_time");
         return sonarSyncResultRepository.findAll(new Specification<SonarSyncResult>() {
