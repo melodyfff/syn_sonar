@@ -4,6 +4,7 @@ $(function() {
     $.ajax({
         type: "POST",
         url: baseUrl + '/getAllUser',
+        // data: {"page":5},
         success: function(data){
             $('#userList').html(data);
             console.log(data);

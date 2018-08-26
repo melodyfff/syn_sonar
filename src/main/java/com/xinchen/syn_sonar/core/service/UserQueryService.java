@@ -2,6 +2,7 @@ package com.xinchen.syn_sonar.core.service;
 
 import com.xinchen.syn_sonar.core.entity.User;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.querydsl.QPageRequest;
 
 /**
@@ -15,5 +16,5 @@ public interface UserQueryService {
      * @param qPageRequest 查询条件
      * @return Page<User>
      */
-    Page<User> findUsers(QPageRequest qPageRequest);
+    Page<User> findUsers(PageRequest qPageRequest);
 }

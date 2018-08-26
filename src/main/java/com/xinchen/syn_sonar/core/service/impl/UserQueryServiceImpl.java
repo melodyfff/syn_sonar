@@ -4,7 +4,7 @@ import com.xinchen.syn_sonar.core.entity.User;
 import com.xinchen.syn_sonar.core.repository.UserRepository;
 import com.xinchen.syn_sonar.core.service.UserQueryService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.querydsl.QPageRequest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -23,7 +23,7 @@ public class UserQueryServiceImpl implements UserQueryService {
     private UserRepository userRepository;
 
     @Override
-    public Page<User> findUsers(QPageRequest qPageRequest) {
-        return userRepository.findAll(qPageRequest);
+    public Page<User> findUsers(PageRequest pageRequest) {
+        return userRepository.findAll(pageRequest);
     }
 }

@@ -4,12 +4,12 @@ import com.xinchen.syn_sonar.core.entity.User;
 import com.xinchen.syn_sonar.core.service.UserQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.querydsl.QPageRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,9 +28,10 @@ public class UserController {
     @RequestMapping(value = "/getAllUser",method = RequestMethod.POST)
     public ModelAndView getAllUser(HttpServletRequest request,
                                    @RequestParam(name = "page",defaultValue = "0") Integer page,
-                                   @RequestParam(name = "size",defaultValue = "5") Integer size){
+                                   @RequestParam(name = "size",defaultValue = "10") Integer size){
         ModelAndView mav = new ModelAndView("page/user");
-        final Page<User> users = userQueryService.findUsers(new QPageRequest(page, size));
+
+        final Page<User> users = userQueryService.findUsers( PageRequest.of(page, size, Sort.Direction.DESC,"id"));
         mav.addObject("datas", users);
         return mav;
     }

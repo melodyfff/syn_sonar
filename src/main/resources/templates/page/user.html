@@ -1,3 +1,4 @@
+<html xmlns:th="http://www.thymeleaf.org">
 <table class="table table-hover">
     <thead>
     <tr>
@@ -16,3 +17,44 @@
     </tr>
     </tbody>
 </table>
+<!-- 总页数 -->
+<span th:text="${datas.totalPages}"></span>
+<!-- 每页显示 -->
+<span th:text="${datas.size}"></span>
+<!-- 当前页 -->
+<span th:text="${datas.pageable.pageNumber}"></span>
+
+<script th:inline="javascript">
+    var result = [[${datas}]];
+    $('#pageLimit').bootstrapPaginator({
+        bootstrapMajorVersion: 3,//bootstrap版本
+        currentPage: result.pageable.pageNumber==0?1:result.pageable.pageNumber+1,//当前页码
+        totalPages: result.totalPages,//总页数（后台传过来的数据）
+        numberOfPages: 5,//一页显示几个按钮
+        itemTexts: function (type, page, current) {
+            switch (type) {
+                case "first": return "首页";
+                case "prev": return "上一页";
+                case "next": return "下一页";
+                case "last": return "末页";
+                case "page": return page;
+            }
+        },//改写分页按钮字样
+        onPageClicked: function (event, originalEvent, type, page) {
+            $.ajax({
+                url: baseUrl + '/getAllUser',
+                type: 'post',
+                data: {page: page-1},
+                // dataType: 'json',
+                success: function (data) {
+                    $('#userList').empty().html(data);
+                },
+                // error: function (result) {
+                //     console.log(result);
+                //     console.log(result.status);
+                //     console.log(result.responseJSON.message);
+                // }
+            });
+        }
+    });
+</script>

@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -27,7 +28,7 @@ public class UserQueryServiceImplTest {
     @Test
     public void testFind(){
 
-        QPageRequest qPageRequest = new QPageRequest(0,5);
+        PageRequest qPageRequest = PageRequest.of(0,5);
         final Page<User> users = userQueryService.findUsers(qPageRequest);
         JSONObject.toJSON(users);
 
