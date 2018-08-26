@@ -15,7 +15,7 @@ import lombok.Data;
  * @since 1.0
  */
 @Data
-public class Page {
+public class RulePage {
     private Integer total;
     private Integer p;
     private Integer ps;
