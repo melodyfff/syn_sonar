@@ -46,4 +46,8 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     public void saveSonarSyncResult(SonarSyncResult sonarSyncResult){
         sonarSyncResultRepository.save(sonarSyncResult);
     }
+
+    public void process(){
+
+    }
 }

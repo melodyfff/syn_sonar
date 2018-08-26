@@ -42,8 +42,8 @@ public class SonarSyncResult implements Serializable {
     private Date createdTime;
     @Column(name = "result_type")
     private ResultType resultType;
-    @Column(name = "exrta")
-    private String extra;
+    @Column(name = "rule_id")
+    private String ruleId;
 
     public enum ResultType {
         ADD, MODIFY
