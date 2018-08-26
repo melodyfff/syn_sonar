@@ -1,10 +1,10 @@
 $(function(){
     // 设置CSRF
-    var token = $("meta[name='_csrf']").attr("content");
-    var header = $("meta[name='_csrf_header']").attr("content");
-    $(document).ajaxSend(function(e, xhr, options) {
-        xhr.setRequestHeader(header, token);
-    });
+    // var token = $("meta[name='_csrf']").attr("content");
+    // var header = $("meta[name='_csrf_header']").attr("content");
+    // $(document).ajaxSend(function(e, xhr, options) {
+    //     xhr.setRequestHeader(header, token);
+    // });
 
     // 设置jQuery Ajax全局的参数
     $.ajaxSetup({

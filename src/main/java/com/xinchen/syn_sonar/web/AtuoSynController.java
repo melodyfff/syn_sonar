@@ -1,5 +1,7 @@
 package com.xinchen.syn_sonar.web;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 public class AtuoSynController {
 
     @PostMapping(value = "/autoSyn")
-    public String autoSyn(HttpServletRequest request){
-        return "ok";
+    public ResponseEntity autoSyn(HttpServletRequest request){
+        return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 }
