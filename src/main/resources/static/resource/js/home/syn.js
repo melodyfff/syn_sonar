@@ -1,38 +1,61 @@
 $(function () {
     $('#syn_button').off('click').on('click', function () {
 
+        // const {value: password} = await swal({
+        //     title: 'Enter your password',
+        //     input: 'password',
+        //     inputPlaceholder: 'Enter your password',
+        //     inputAttributes: {
+        //         maxlength: 10,
+        //         autocapitalize: 'off',
+        //         autocorrect: 'off'
+        //     }
+        // });
+        // if (password) {
+        //     swal('Entered password: ' + password)
+        // }
+
         swal({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            type: 'warning',
+            type: 'info',
+            title: '请输入执行码进行操作!',
+            // text: "You won't be able to revert this!",
+            // type: 'warning',
+            input: 'password',
+            inputPlaceholder: '输入执行码...',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             // showLoaderOnConfirm: true,
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: '确定',
+            cancelButtonText: '取消'
         }).then(function (isConfirm) {
-            console.log(isConfirm)
+            // console.log(isConfirm)
             if (isConfirm.dismiss) {
-                swal(
-                    '取消',
-                    '',
-                    'error'
-                );
+                // swal(
+                //     '取消',
+                //     '',
+                //     'error'
+                // );
                 return;
             }
             if (isConfirm) {
+                var code = isConfirm.value;
+                // console.log(code);
                 $.ajax({
                     type: "POST",
+                    data: {"code":code},
                     async:false,
                     url: baseUrl + '/autoSyn',
                     // data: {"page":5},
                     success: function(data){
-                        console.log(data);
+                        // console.log(data);
                         swal(
                             '自动同步成功!',
                             'Sonar规则已经自动同步完成.',
                             'success'
-                        );
+                        ).then(function (isConfirm) {
+                            location.href = location.href;
+                        });
                     },
                     // error: function (result) {
                     //     console.log(result);
