@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 public class ResultAnalyse {
-    private String chongQinSonarRuleId;
-    private String beiJinSonarRuleId;
+    private String localSonarRuleId;
+    private String remoteSonarRuleId;
     private String analyseResult;
 }
