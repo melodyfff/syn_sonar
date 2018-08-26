@@ -41,4 +41,9 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
             }
         }, pageRequest);
     }
+
+    @Override
+    public void saveSonarSyncResult(SonarSyncResult sonarSyncResult){
+        sonarSyncResultRepository.save(sonarSyncResult);
+    }
 }

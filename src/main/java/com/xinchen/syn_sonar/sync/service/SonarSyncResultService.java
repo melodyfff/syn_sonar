@@ -25,4 +25,11 @@ public interface SonarSyncResultService {
      * @return 结果
      */
     Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync);
+
+    /**
+     * 保存SonarSyncResult
+     *
+     * @param sonarSyncResult
+     */
+    void saveSonarSyncResult(SonarSyncResult sonarSyncResult);
 }
