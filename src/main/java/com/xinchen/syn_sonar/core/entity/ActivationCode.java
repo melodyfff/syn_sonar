@@ -20,7 +20,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @Proxy(lazy = false)
-public class AtchiveCode implements Serializable {
+public class ActivationCode implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JSONField(ordinal = 1)
