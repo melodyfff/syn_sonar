@@ -14,7 +14,7 @@ public interface UserQueryService {
     /**
      * 查询所有用户
      * @param qPageRequest 查询条件
-     * @return Page<User>
+     * @return RulePage<User>
      */
     Page<User> findUsers(PageRequest qPageRequest);
 }
