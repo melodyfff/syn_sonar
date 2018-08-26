@@ -3,7 +3,7 @@
  * 项目名：syn_sonar
  * 注意：未经作者允许，不得外传
  */
-package com.xinchen.syn_sonar.model;
+package com.xinchen.syn_sonar.sync.model;
 
 import java.util.List;
 

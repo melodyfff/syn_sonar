@@ -5,13 +5,13 @@
  */
 package com.xinchen.syn_sonar;
 
-import com.xinchen.syn_sonar.model.Page;
-import com.xinchen.syn_sonar.model.ProfilesActions;
-import com.xinchen.syn_sonar.model.RuleActives;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.xinchen.syn_sonar.sync.model.Page;
+import com.xinchen.syn_sonar.sync.model.ProfilesActions;
+import com.xinchen.syn_sonar.sync.model.RuleActives;
 
 import org.springframework.web.client.RestTemplate;
 
