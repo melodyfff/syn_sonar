@@ -1,6 +1,7 @@
 package com.xinchen.syn_sonar.core.repository;
 
 import com.alibaba.fastjson.JSONObject;
+import com.xinchen.syn_sonar.SynSonarApplicationTests;
 import com.xinchen.syn_sonar.core.entity.User;
 import com.xinchen.syn_sonar.core.service.UserQueryService;
 import org.junit.Test;
@@ -20,9 +21,8 @@ import static org.junit.Assert.*;
  * @version 1.0
  * @date Created In 2018/8/25 23:19
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class UserRepositoryTest {
+
+public class UserRepositoryTest extends SynSonarApplicationTests {
     @Autowired
     private UserRepository userRepository;
 

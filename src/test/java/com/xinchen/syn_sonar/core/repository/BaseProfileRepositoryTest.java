@@ -1,5 +1,6 @@
 package com.xinchen.syn_sonar.core.repository;
 
+import com.xinchen.syn_sonar.SynSonarApplicationTests;
 import com.xinchen.syn_sonar.core.entity.BaseProfile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +15,7 @@ import static org.junit.Assert.*;
  * @version 1.0
  * @date Created In 2018/8/26 15:56
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class BaseProfileRepositoryTest {
+public class BaseProfileRepositoryTest extends SynSonarApplicationTests {
     @Autowired
     private BaseProfileRepository baseProfileRepository;
 
