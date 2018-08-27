@@ -47,7 +47,10 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         sonarSyncResultRepository.save(sonarSyncResult);
     }
 
-    public void process(){
-
+    @Override
+    public void deleteSonarSyncResult(String ruleKey) {
+        SonarSyncResult sonarSyncResult = new SonarSyncResult();
+        sonarSyncResult.setRuleKey(ruleKey);
+        sonarSyncResultRepository.delete(sonarSyncResult);
     }
 }

@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.xinchen.syn_sonar.sync.model.Page;
+import com.xinchen.syn_sonar.sync.model.RulePage;
 import com.xinchen.syn_sonar.sync.model.ProfilesActions;
 import com.xinchen.syn_sonar.sync.model.RuleActives;
 
@@ -31,6 +31,7 @@ public class SonarRestTest extends SynSonarApplicationTests {
         String url="http://localhost:9000/api/qualityprofiles/search?defaults=true";
         ProfilesActions profilesActions = restTemplate.getForObject(url, ProfilesActions.class);
         LOGGER.info(profilesActions.toString());
+        LOGGER.info("profile size:{}",profilesActions.getProfiles().size());
     }
 
     //查询特定类型中包含的规则，如java的规则有哪些
@@ -38,14 +39,14 @@ public class SonarRestTest extends SynSonarApplicationTests {
     @Test
     public void test2(){
         String url="http://localhost:9000/api/rules/search?qprofile=AWV1AVEh6AnXIfQjv3ES&activation=true&p=1&ps=1&facets=types";
-        Page profilesActions = restTemplate.getForObject(url, Page.class);
+        RulePage profilesActions = restTemplate.getForObject(url, RulePage.class);
         LOGGER.info(profilesActions.toString());
     }
 
     @Test
     public void test3(){
         String url="http://localhost:9000/api/rules/search?qprofile=AWV1AVEh6AnXIfQjv3ES&activation=true&p=1&ps=1&facets=types";
-        Page profilesActions = restTemplate.getForObject(url, Page.class);
+        RulePage profilesActions = restTemplate.getForObject(url, RulePage.class);
         LOGGER.info(profilesActions.toString());
     }
 

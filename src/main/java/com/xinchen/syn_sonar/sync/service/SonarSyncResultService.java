@@ -32,4 +32,11 @@ public interface SonarSyncResultService {
      * @param sonarSyncResult
      */
     void saveSonarSyncResult(SonarSyncResult sonarSyncResult);
+
+    /**
+     * 按规则key，进行删除
+     *
+     * @param ruleKey
+     */
+    void deleteSonarSyncResult(String ruleKey);
 }
