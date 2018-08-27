@@ -5,24 +5,30 @@
  */
 package com.xinchen.syn_sonar.sonar;
 
-import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadFactory;
-import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadPoolExecutor;
-import com.xinchen.syn_sonar.sonar.thread.RulePullCallable;
-import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
-import com.xinchen.syn_sonar.sync.model.*;
-import com.xinchen.syn_sonar.sync.service.SonarSyncResultService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadFactory;
+import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadPoolExecutor;
+import com.xinchen.syn_sonar.sonar.thread.RulePullCallable;
+import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
+import com.xinchen.syn_sonar.sync.model.Profile;
+import com.xinchen.syn_sonar.sync.model.ProfilesActions;
+import com.xinchen.syn_sonar.sync.model.Rule;
+import com.xinchen.syn_sonar.sync.model.RuleActives;
+import com.xinchen.syn_sonar.sync.model.RulePage;
+import com.xinchen.syn_sonar.sync.service.SonarSyncResultService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author dmj1161859184@126.com 2018-08-27 00:31
@@ -55,19 +61,21 @@ public class SonarSyncProcessor {
 
     /**
      * 同步远程服务器和本地服务器上的规则
-     *
-     * @throws ExecutionException
-     * @throws InterruptedException
      */
-    public void process() throws ExecutionException, InterruptedException {
+    public void process() {
         List<Profile> profiles = getRemoteAllProfilesActions().getProfiles();
         LOGGER.info("远程sonar上获得的profile个数是:{}", profiles.size());
         for (Profile profile : profiles) {
-            processProfileRules(profile);
+            try {
+                processProfileRules(profile);
+            } catch (ExecutionException e) {
+                //有意的不抛出异常
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 
-    private void processProfileRules(Profile profile) throws ExecutionException, InterruptedException {
+    private void processProfileRules(Profile profile) throws ExecutionException {
         LOGGER.info("开始处理profile:{}", profile);
         int page = 1;
         int pageSize = 100;
@@ -80,9 +88,14 @@ public class SonarSyncProcessor {
                 Future<RuleActives> remoteRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplate, sonarSyncComponent, rule.getKey(), true));
                 Future<RuleActives> localRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplate, sonarSyncComponent, rule.getKey(), false));
 
-                RuleActives remoteRule = remoteRuleFuture.get();
-                RuleActives localRule = localRuleFuture.get();
-                doProcess(remoteRule, localRule);
+                try {
+                    RuleActives remoteRule = remoteRuleFuture.get();
+                    RuleActives localRule = localRuleFuture.get();
+                    doProcess(remoteRule, localRule);
+                } catch (InterruptedException e) {
+                    //有意的不抛出异常
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
             rulePage = getRemoteRulePage(profile.getKey(), page + 1, pageSize);
             LOGGER.info("从远程sonar上获得的,{}对应的rule个数是{}", profile.getKey(), rulePage.getRules().size());
@@ -125,7 +138,7 @@ public class SonarSyncProcessor {
     }
 
     private void saveOrUpdateSonarSyncResult(SonarSyncResult sonarSyncResult) {
-        //一定要删除，不然会堆积
+        //一定要删除后再添加，不然很有可能会堆积
         sonarSyncResultService.deleteSonarSyncResult(sonarSyncResult.getRuleKey());
         sonarSyncResultService.saveSonarSyncResult(sonarSyncResult);
     }
