@@ -17,5 +17,4 @@ import lombok.Data;
 @Data
 public class RuleActives {
     private Rule rule;
-    private List<Active> actives;
 }

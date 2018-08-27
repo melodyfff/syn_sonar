@@ -24,9 +24,6 @@ public class Rule {
     private String mdDesc;
     private String severity;
     private String status;
-    private Boolean isTemplate;
-    private List<Object> tags;
-    private List<String> sysTags;
     private String lang;
     private String langName;
     private String type;
