@@ -42,7 +42,8 @@ public class SonarSyncProcessor {
      */
     private static final ThreadPoolExecutor poolExecutor = CustomizedThreadPoolExecutor.customizedThreadPoolExecutor(2, 2, CustomizedThreadFactory.customizedThreadFactory());
 
-    private static RestTemplate restTemplate = RestTemplateFactory.getRestTemplate();
+    @Autowired
+    private RestTemplateComponent restTemplateComponent;
 
     @Autowired
     private SonarSyncComponent sonarSyncComponent;
@@ -78,8 +79,8 @@ public class SonarSyncProcessor {
         while (rulePage.getP() * rulePage.getPs() < rulePage.getTotal()) {
             List<Rule> rules = rulePage.getRules();
             for (Rule rule : rules) {
-                Future<RuleActives> remoteRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplate, sonarSyncComponent, rule.getKey(), true));
-                Future<RuleActives> localRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplate, sonarSyncComponent, rule.getKey(), false));
+                Future<RuleActives> remoteRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplateComponent.getRestTemplateRemote(), sonarSyncComponent, rule.getKey(), true));
+                Future<RuleActives> localRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplateComponent.getRestTemplateLocal(), sonarSyncComponent, rule.getKey(), false));
                 try {
                     RuleActives remoteRule = remoteRuleFuture.get();
                     RuleActives localRule = localRuleFuture.get();
@@ -139,13 +140,13 @@ public class SonarSyncProcessor {
 
     private ProfilesActions getRemoteAllProfilesActions() {
         String url = "http://%s:%d/api/qualityprofiles/search?defaults=true";
-        url = String.format(url, sonarSyncComponent.getRemotehost(), sonarSyncComponent.getRemoteport());
-        return restTemplate.getForObject(url, ProfilesActions.class);
+        url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort());
+        return restTemplateComponent.getRestTemplateRemote().getForObject(url, ProfilesActions.class);
     }
 
     private RulePage getRemoteRulePage(String profileKey, int page, int pageSize) {
         String url = "http://%s:%d/api/rules/search?qprofile=%s&activation=true&p=%d&ps=%d&facets=types";
-        url = String.format(url, sonarSyncComponent.getRemotehost(), sonarSyncComponent.getRemoteport(), profileKey, page, pageSize);
-        return restTemplate.getForObject(url, RulePage.class);
+        url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort(), profileKey, page, pageSize);
+        return restTemplateComponent.getRestTemplateRemote().getForObject(url, RulePage.class);
     }
 }
