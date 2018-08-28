@@ -40,12 +40,18 @@ public class SonarSyncResult implements Serializable {
     private Date updatedTime;
     @Column(name = "created_time")
     private Date createdTime;
-    @Column(name = "result_type")
-    private ResultType resultType;
+    @Column(name = "absence")
+    private Boolean absence;
+    @Column(name = "profile_key")
+    private String profileKey;
     @Column(name = "rule_key")
     private String ruleKey;
-
-    public enum ResultType {
-        ABSENCE, SEVERITY_DIFFERENCE
-    }
+    @Column(name = "local_severity")
+    private String localSeverity;
+    @Column(name = "remote_severity")
+    private String remoteSeverity;
+    @Column(name = "local_status")
+    private String localStatus;
+    @Column(name = "remote_status")
+    private String remoteStatus;
 }

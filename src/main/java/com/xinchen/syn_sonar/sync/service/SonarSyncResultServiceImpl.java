@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.xinchen.syn_sonar.sonar.RestTemplateComponent;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     @Autowired
     private SonarSyncResultRepository sonarSyncResultRepository;
+    @Autowired
+    private RestTemplateComponent restTemplateComponent;
 
     @Override
     public Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync) {
@@ -43,7 +46,7 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     }
 
     @Override
-    public void saveSonarSyncResult(SonarSyncResult sonarSyncResult){
+    public void saveSonarSyncResult(SonarSyncResult sonarSyncResult) {
         sonarSyncResultRepository.save(sonarSyncResult);
     }
 
@@ -52,5 +55,19 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         SonarSyncResult sonarSyncResult = new SonarSyncResult();
         sonarSyncResult.setRuleKey(ruleKey);
         sonarSyncResultRepository.delete(sonarSyncResult);
+    }
+
+    @Override
+    public void activeLocalRule(String profileKey, String ruleKey) {
+        String url = "/api/qualityprofiles/activate_rule?key=%s&rule=%s";
+        url = String.format(url, profileKey, ruleKey);
+        restTemplateComponent.getRestTemplateLocal().getForObject(url, Void.class);
+    }
+
+    @Override
+    public void deactiveLocalRule(String profileKey, String ruleKey) {
+        String url = "/api/qualityprofiles/deactivate_rule?key=%s&rule=%s";
+        url = String.format(url, profileKey, ruleKey);
+        restTemplateComponent.getRestTemplateLocal().getForObject(url, Void.class);
     }
 }

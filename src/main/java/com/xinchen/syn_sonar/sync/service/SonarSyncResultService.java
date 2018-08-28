@@ -39,4 +39,20 @@ public interface SonarSyncResultService {
      * @param ruleKey
      */
     void deleteSonarSyncResult(String ruleKey);
+
+    /**
+     * 激活规则
+     *
+     * @param profileKey
+     * @param ruleKey
+     */
+    void activeLocalRule(String profileKey,String ruleKey);
+
+    /**
+     * 失效某个规则
+     *
+     * @param profileKey
+     * @param ruleKey
+     */
+    void deactiveLocalRule(String profileKey, String ruleKey);
 }

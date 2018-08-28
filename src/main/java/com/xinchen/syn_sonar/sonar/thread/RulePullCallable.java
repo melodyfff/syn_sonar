@@ -49,7 +49,7 @@ public class RulePullCallable implements Callable<RuleActives> {
     }
 
     private Object[] getParameters(String key, boolean isRemote) {
-        return isRemote ? new Object[]{sonarSyncComponent.getRemotehost(), sonarSyncComponent.getRemoteport(), key} :
-                new Object[]{sonarSyncComponent.getLocalhost(), sonarSyncComponent.getLocalport(), key};
+        return isRemote ? new Object[]{sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort(), key} :
+                new Object[]{sonarSyncComponent.getLocalHost(), sonarSyncComponent.getLocalPort(), key};
     }
 }
