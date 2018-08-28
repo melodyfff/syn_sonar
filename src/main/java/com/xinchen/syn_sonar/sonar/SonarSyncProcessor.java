@@ -53,6 +53,8 @@ public class SonarSyncProcessor {
      * 同步远程服务器和本地服务器上的规则
      */
     public void process() {
+        long startTime = System.currentTimeMillis();
+        LOGGER.info("同步任务开始执行");
         List<Profile> profiles = getRemoteAllProfilesActions().getProfiles();
         LOGGER.info("远程sonar上获得的profile个数是:{}", profiles.size());
         for (Profile profile : profiles) {
@@ -63,6 +65,7 @@ public class SonarSyncProcessor {
                 LOGGER.error(e.getMessage(), e);
             }
         }
+        LOGGER.info("同步任务结束执行，用时{}毫秒", (System.currentTimeMillis() - startTime));
     }
 
     private void processProfileRules(Profile profile) throws ExecutionException {
