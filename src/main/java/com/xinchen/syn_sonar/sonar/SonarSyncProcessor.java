@@ -104,20 +104,27 @@ public class SonarSyncProcessor {
         sonarSyncResult.setCreatedTime(new Date());
         sonarSyncResult.setUpdatedTime(new Date());
 
+        boolean flag=false;
         if (localRule == null) {
             //本地没有该规则
-            LOGGER.info("远程sonar的规则{}，本地sonar上没有", remoteRule);
+            sonarSyncResult.setAbsence(true);
+            flag=true;
+            LOGGER.info("规则缺失，远程sonar的规则{}，本地sonar上没有", remoteRule);
         } else {
             if (!remoteRule.getRule().getSeverity().equalsIgnoreCase(localRule.getRule().getSeverity())) {
                 //severity不同
                 processSeverityDifference(sonarSyncResult, remoteRule, localRule);
+                flag=true;
             }
             if (!remoteRule.getRule().getStatus().equalsIgnoreCase(localRule.getRule().getStatus())) {
                 //status不同
                 processStatusDifference(sonarSyncResult, remoteRule, localRule);
+                flag=true;
             }
         }
-        saveOrUpdateSonarSyncResult(sonarSyncResult);
+        if (flag) {
+            saveOrUpdateSonarSyncResult(sonarSyncResult);
+        }
     }
 
     private void processStatusDifference(SonarSyncResult sonarSyncResult, RuleActives remoteRule, RuleActives localRule) {
