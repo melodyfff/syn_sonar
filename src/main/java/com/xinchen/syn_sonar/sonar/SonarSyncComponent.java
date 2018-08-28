@@ -8,6 +8,7 @@ package com.xinchen.syn_sonar.sonar;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -17,7 +18,7 @@ import org.springframework.validation.annotation.Validated;
  * @since 1.0
  */
 @Component
-//@ConfigurationProperties(prefix = "sonarsync")
+@ConfigurationProperties(prefix = "sonarsync")
 @Validated
 public class SonarSyncComponent {
     @NotEmpty

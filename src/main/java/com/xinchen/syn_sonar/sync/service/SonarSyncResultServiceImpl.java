@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.xinchen.syn_sonar.sonar.RestTemplateFactory;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author dmj1161859184@126.com 2018-08-26 18:46
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("sonarSyncResultService")
 public class SonarSyncResultServiceImpl implements SonarSyncResultService {
+    private static RestTemplate restTemplate = RestTemplateFactory.getRestTemplate();
     @Autowired
     private SonarSyncResultRepository sonarSyncResultRepository;
 
@@ -52,5 +55,17 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         SonarSyncResult sonarSyncResult = new SonarSyncResult();
         sonarSyncResult.setRuleKey(ruleKey);
         sonarSyncResultRepository.delete(sonarSyncResult);
+    }
+
+    public void activeLocalRule(String profileKey,String ruleKey){
+        String url="/api/qualityprofiles/activate_rule?key=%s&rule=%s";
+        url = String.format(url,profileKey,ruleKey);
+        restTemplate.getForObject(url,Void.class);
+    }
+
+    public void deactiveRule(String profileKey, String ruleKey) {
+        String url="/api/qualityprofiles/deactivate_rule?key=%s&rule=%s";
+        url = String.format(url,profileKey,ruleKey);
+        restTemplate.getForObject(url,Void.class);
     }
 }
