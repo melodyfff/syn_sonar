@@ -5,6 +5,8 @@
  */
 package com.xinchen.syn_sonar.sync.service;
 
+import java.util.List;
+
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 
 import org.springframework.data.domain.Page;
@@ -30,6 +32,8 @@ public interface SonarSyncResultService {
      * 规则比较，记录到日志和数据库
      */
     void compare();
+
+    List<SonarSyncResult> findAllByLanguage(final String language);
 
     /**
      * 保存SonarSyncResult

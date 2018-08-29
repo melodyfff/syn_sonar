@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -23,6 +25,8 @@ import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -61,6 +65,18 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
                 return criteriaBuilder.and(language);
             }
         }, pageRequest);
+    }
+
+    @Override
+    public List<SonarSyncResult> findAllByLanguage(final String language) {
+        String languageName = language;
+        return sonarSyncResultRepository.findAll(new Specification<SonarSyncResult>() {
+            @Override
+            public Predicate toPredicate(Root<SonarSyncResult> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                Predicate languagePredicate = criteriaBuilder.equal(root.get("language").as(String.class), languageName);
+                return criteriaBuilder.and(languagePredicate);
+            }
+        });
     }
 
     @Override
@@ -106,11 +122,13 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         String password = sonarSyncComponent.getLocalPassword();
         String userMsg = user + ":" + password;
         String base64UserMsg = Base64.getEncoder().encodeToString(userMsg.getBytes());
-        headers.add("Authorization ", "Basic "+base64UserMsg);
+        //headers.add("User-Agent", "curl/7.58.0");
+        headers.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36");
+        headers.add("Authorization", "Basic "+base64UserMsg);
         MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
-        map.put("key", Arrays.asList(profile));
-        map.put("rule",Arrays.asList(ruleKey));
-
+        map.put("profile_key",Arrays.asList(profile));
+        map.put("rule_key",Arrays.asList(ruleKey));
+        map.put("severity",Arrays.asList(severity));
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
         ResponseEntity<Void> response = restTemplateComponent.getRestTemplateLocal().postForEntity( url, request,Void.class);
@@ -129,6 +147,17 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     public void deleteSonarSyncResult(String ruleKey) {
         SonarSyncResult sonarSyncResult = new SonarSyncResult();
         sonarSyncResult.setRuleKey(ruleKey);
-        sonarSyncResultRepository.delete(sonarSyncResult);
+        //先查出，后根据ID删除，心累
+        List<SonarSyncResult> sonarSyncResults = sonarSyncResultRepository.findAll(new Specification<SonarSyncResult>() {
+            @Override
+            public Predicate toPredicate(Root<SonarSyncResult> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                Predicate predicate = criteriaBuilder.equal(root.get("ruleKey").as(String.class), ruleKey);
+                return criteriaBuilder.and(predicate);
+            }
+        });
+        System.out.println(sonarSyncResults);
+        for (SonarSyncResult sonarSyncResult1 : sonarSyncResults) {
+            sonarSyncResultRepository.deleteById(sonarSyncResult1.getId());
+        }
     }
 }

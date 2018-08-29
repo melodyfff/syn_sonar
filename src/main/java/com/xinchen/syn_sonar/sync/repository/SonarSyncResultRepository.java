@@ -9,6 +9,7 @@ import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,6 +18,6 @@ import org.springframework.stereotype.Repository;
  * @since 1.0
  */
 @Repository("sonarSyncResultRepository")
-public interface SonarSyncResultRepository extends JpaRepository<SonarSyncResult, Long>,
+public interface SonarSyncResultRepository extends CrudRepository<SonarSyncResult, Long>,
         JpaSpecificationExecutor<SonarSyncResult> {
 }

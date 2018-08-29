@@ -1,6 +1,9 @@
 package com.xinchen.syn_sonar.sync.service;
 
+import java.util.List;
+
 import com.xinchen.syn_sonar.SynSonarApplicationTests;
+import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 
 import org.junit.Test;
 
@@ -17,5 +20,17 @@ public class SonarSyncResultServiceImplTest extends SynSonarApplicationTests {
     @Test
     public void test(){
         sonarSyncResultService.changeLocalSeverity("AWWBDjE14dKO5VYIM2kw","squid:S2204","CRITICAL");
+    }
+
+    @Test
+    public void test_delete(){
+        sonarSyncResultService.deleteSonarSyncResult("squid:S3751");
+    }
+
+    @Test
+    public void test_getByLanguage(){
+        List<SonarSyncResult> result = sonarSyncResultService.findAllByLanguage("Java");
+        System.out.println(result.size());
+        System.out.println(result);
     }
 }
