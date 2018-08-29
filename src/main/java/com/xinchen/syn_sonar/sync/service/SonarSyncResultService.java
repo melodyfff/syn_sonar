@@ -55,4 +55,12 @@ public interface SonarSyncResultService {
      * @param ruleKey
      */
     void deactiveLocalRule(String profileKey, String ruleKey);
+
+    /**
+     * 修改规则的severity
+     *
+     * @param ruleKey
+     * @param Serverity
+     */
+    void changeServerity(String ruleKey, String Serverity);
 }

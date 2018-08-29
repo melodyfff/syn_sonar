@@ -70,4 +70,9 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         url = String.format(url, profileKey, ruleKey);
         restTemplateComponent.getRestTemplateLocal().getForObject(url, Void.class);
     }
+
+    @Override
+    public void changeServerity(String ruleKey, String Serverity){
+        //TODO
+    }
 }
