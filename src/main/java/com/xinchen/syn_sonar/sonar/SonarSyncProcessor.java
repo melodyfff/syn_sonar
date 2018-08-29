@@ -127,7 +127,7 @@ public class SonarSyncProcessor {
         //本地没有该规则
         sonarSyncResult.setAbsence(true);
         saveOrUpdateSonarSyncResult(sonarSyncResult);
-        LOGGER.info("规则缺失，远程sonar的规则{}，本地sonar上没有", remoteRule);
+        LOGGER.info("规则缺失，远程sonar的规则ID:{}，severity:{}，status:{}，type:{}，本地sonar上没有", remoteRule.getKey(), remoteRule.getSeverity(), remoteRule.getStatus(),remoteRule.getType());
     }
 
     private SonarSyncResult getSonarSyncResult(String remoteProfileKey, String localProfileKey, Rule remoteRule) {
@@ -142,13 +142,13 @@ public class SonarSyncProcessor {
     }
 
     private void processStatusDifference(SonarSyncResult sonarSyncResult, Rule remoteRule, Rule localRule) {
-        LOGGER.info("远程规则的status和本地规则status不一样，远程:{},本地:{}", remoteRule, localRule);
+        LOGGER.info("规则的status不一样，规则ID:{}，远程status:{},本地status:{}",remoteRule.getKey(), remoteRule.getStatus(), localRule.getStatus());
         sonarSyncResult.setRemoteStatus(remoteRule.getStatus());
         sonarSyncResult.setLocalStatus(localRule.getStatus());
     }
 
     private void processSeverityDifference(SonarSyncResult sonarSyncResult, Rule remoteRule, Rule localRule) {
-        LOGGER.info("远程规则的severity和本地规则severity不一样，远程:{},本地:{}", remoteRule, localRule);
+        LOGGER.info("规则的severity不一样，规则ID:{}，远程severity:{},本地severity:{}",remoteRule.getKey(), remoteRule.getSeverity(), localRule.getSeverity());
         sonarSyncResult.setLocalSeverity(localRule.getSeverity());
         sonarSyncResult.setRemoteSeverity(remoteRule.getSeverity());
     }

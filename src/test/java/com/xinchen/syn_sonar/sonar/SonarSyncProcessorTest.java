@@ -29,6 +29,11 @@ public class SonarSyncProcessorTest extends SynSonarApplicationTests {
     }
 
     @Test
+    public void test_changeSeverity(){
+
+    }
+
+    @Test
     public void test(){
         String profile="AWWBDzIIsOba1zB1O1Ea";
         String key="squid:S2757";

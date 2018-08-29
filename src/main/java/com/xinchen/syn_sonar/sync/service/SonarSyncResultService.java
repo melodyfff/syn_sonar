@@ -27,6 +27,11 @@ public interface SonarSyncResultService {
     Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync);
 
     /**
+     * 规则比较，记录到日志和数据库
+     */
+    void compare();
+
+    /**
      * 保存SonarSyncResult
      *
      * @param sonarSyncResult
@@ -62,5 +67,15 @@ public interface SonarSyncResultService {
      * @param ruleKey
      * @param Serverity
      */
-    void changeServerity(String ruleKey, String Serverity);
+    void changeLocalSeverity(String ruleKey, String Serverity);
+
+    /**
+     * 修改规则的status
+     *
+     * @param ruleKey
+     * @param status
+     */
+    void changeLocalStatus(String profile,String ruleKey,String status);
+
+    void changeLocalSeverity(String profile,String ruleKey, String severity);
 }

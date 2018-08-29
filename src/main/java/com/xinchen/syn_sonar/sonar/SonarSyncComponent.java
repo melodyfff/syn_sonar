@@ -43,6 +43,14 @@ public class SonarSyncComponent {
     @Value("${sonarsync.remote.password}")
     private String remotePassword;
 
+    public String getLocalHttpURL(){
+        return "http://"+localHost+":"+localPort;
+    }
+
+    public String getRemoteHttpURL(){
+        return "http://"+remoteHost+":"+remotePort;
+    }
+
     public String getLocalHost() {
         return localHost;
     }

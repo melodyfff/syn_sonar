@@ -5,9 +5,14 @@
  */
 package com.xinchen.syn_sonar.sonar;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateComponent implements InitializingBean {
     private RestTemplate restTemplateRemote;
     private RestTemplate restTemplateLocal;
+
     @Autowired
     private SonarSyncComponent sonarSyncComponent;
 
@@ -39,10 +45,18 @@ public class RestTemplateComponent implements InitializingBean {
         //设置为15秒，JDK8上可以用下划线隔开
         requestFactory.setConnectTimeout(15_000);
         requestFactory.setReadTimeout(15_000);
-
         restTemplateLocal = new RestTemplate(requestFactory);
         restTemplateRemote = new RestTemplate(requestFactory);
+    }
 
-
+    public HttpHeaders getHttpHeadersAuthInfo(){
+        String user = sonarSyncComponent.getLocalUsername();
+        String password = sonarSyncComponent.getLocalPassword();
+        String userMsg = user + ":" + password;
+        String base64UserMsg = Base64.getEncoder().encodeToString(userMsg.getBytes(StandardCharsets.UTF_8));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization ", "Basic "+base64UserMsg);
+        headers.add("Content-Type", "form-data");
+        return  headers;
     }
 }
