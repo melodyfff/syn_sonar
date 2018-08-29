@@ -6,19 +6,16 @@
 package com.xinchen.syn_sonar.sonar;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadFactory;
 import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadPoolExecutor;
-import com.xinchen.syn_sonar.sonar.thread.RulePullCallable;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.model.Profile;
 import com.xinchen.syn_sonar.sync.model.ProfilesActions;
 import com.xinchen.syn_sonar.sync.model.Rule;
-import com.xinchen.syn_sonar.sync.model.RuleActives;
 import com.xinchen.syn_sonar.sync.model.RulePage;
 import com.xinchen.syn_sonar.sync.service.SonarSyncResultService;
 
@@ -27,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author dmj1161859184@126.com 2018-08-27 00:31
@@ -56,87 +52,105 @@ public class SonarSyncProcessor {
     public void process() {
         long startTime = System.currentTimeMillis();
         LOGGER.info("同步任务开始执行");
-        List<Profile> profiles = getRemoteAllProfilesActions().getProfiles();
-        LOGGER.info("远程sonar上获得的profile个数是:{}", profiles.size());
-        for (Profile profile : profiles) {
-            try {
-                processProfileRules(profile);
-            } catch (ExecutionException e) {
-                //有意的不抛出异常
-                LOGGER.error(e.getMessage(), e);
+        List<Profile> remoteProfiles = getRemoteAllProfilesActions().getProfiles();
+        List<Profile> localProfiless = getLocalAllProfilesActions().getProfiles();
+        LOGGER.info("远程sonar上获得的profile个数是:{}", remoteProfiles.size());
+        for (Profile remoteProfile : remoteProfiles) {
+            Profile localProfile = getLocalProfile(remoteProfile, localProfiless);
+            if (localProfile == null) {
+                LinkedList<Rule> allRemoteRulePage = getAllRemoteRulePage(remoteProfile.getKey());
+                for (Rule rule : allRemoteRulePage) {
+                    processAbsence(remoteProfile, localProfile, rule);
+                }
+            } else {
+                try {
+                    LinkedList<Rule> allRemoteRulePage = getAllRemoteRulePage(remoteProfile.getKey());
+                    LinkedList<Rule> allLocalRulePage = getAllLocalRulePage(localProfile.getKey());
+                    for (Rule remoteRule : allRemoteRulePage) {
+                        boolean flag = false;
+                        Rule localRule = null;
+                        for (int i = 0; i < allLocalRulePage.size(); i++) {
+                            localRule = allLocalRulePage.get(i);
+                            if (remoteRule.getKey().equalsIgnoreCase(localRule.getKey())) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag) {
+                            processDifference(remoteProfile.getKey(), localProfile.getKey(), remoteRule, localRule);
+                        } else {
+                            processAbsence(remoteProfile, localProfile, remoteRule);
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
         }
         LOGGER.info("同步任务结束执行，用时{}毫秒", (System.currentTimeMillis() - startTime));
     }
 
-    private void processProfileRules(Profile profile) throws ExecutionException {
-        LOGGER.info("开始处理profile:{}", profile);
-        int page = 1;
-        int pageSize = 200;
-        RulePage rulePage = getRemoteRulePage(profile.getKey(), page, pageSize);
-        LOGGER.info("从远程sonar上获得的,{}对应的rule总数是{}", rulePage.getTotal());
-        LOGGER.info("从远程sonar上获得的,{}对应的rule个数是{}", profile.getKey(), rulePage.getRules().size());
-        while (rulePage.getP() * rulePage.getPs() < rulePage.getTotal()) {
-            List<Rule> rules = rulePage.getRules();
-            for (Rule rule : rules) {
-                Future<RuleActives> remoteRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplateComponent.getRestTemplateRemote(), sonarSyncComponent, rule.getKey(), true));
-                Future<RuleActives> localRuleFuture = poolExecutor.submit(new RulePullCallable(restTemplateComponent.getRestTemplateLocal(), sonarSyncComponent, rule.getKey(), false));
-                try {
-                    RuleActives remoteRule = remoteRuleFuture.get();
-                    RuleActives localRule = localRuleFuture.get();
-                    doProcess(profile.getKey(), remoteRule, localRule);
-                } catch (InterruptedException e) {
-                    //有意的不抛出异常
-                    LOGGER.error(e.getMessage(), e);
-                }
+    private Profile getLocalProfile(Profile remoteProfile, List<Profile> localProfiless) {
+        for (Profile profile : localProfiless) {
+            if (remoteProfile.getLanguage().equalsIgnoreCase(profile.getLanguage())) {
+                return profile;
             }
-            rulePage = getRemoteRulePage(profile.getKey(), page + 1, pageSize);
-            LOGGER.info("从远程sonar上获得的,{}对应的rule个数是{}", profile.getKey(), rulePage.getRules().size());
         }
+        return null;
     }
 
-    private void doProcess(String profileKey, RuleActives remoteRule, RuleActives localRule) {
-        SonarSyncResult sonarSyncResult = new SonarSyncResult();
-        Rule rule = remoteRule.getRule();
-        sonarSyncResult.setProfileKey(profileKey);
-        sonarSyncResult.setRuleKey(rule.getKey());
-        sonarSyncResult.setLanguage(rule.getLangName());
-        sonarSyncResult.setCreatedTime(new Date());
-        sonarSyncResult.setUpdatedTime(new Date());
+    private int getTotalPageNum(int pageSize, int total) {
+        int tmp = total % pageSize;
+        return tmp == 0 ? total / pageSize : total / pageSize + 1;
+    }
 
-        boolean flag=false;
-        if (localRule == null) {
-            //本地没有该规则
-            sonarSyncResult.setAbsence(true);
-            flag=true;
-            LOGGER.info("规则缺失，远程sonar的规则{}，本地sonar上没有", remoteRule);
-        } else {
-            if (!remoteRule.getRule().getSeverity().equalsIgnoreCase(localRule.getRule().getSeverity())) {
-                //severity不同
-                processSeverityDifference(sonarSyncResult, remoteRule, localRule);
-                flag=true;
-            }
-            if (!remoteRule.getRule().getStatus().equalsIgnoreCase(localRule.getRule().getStatus())) {
-                //status不同
-                processStatusDifference(sonarSyncResult, remoteRule, localRule);
-                flag=true;
-            }
+    private void processDifference(String profileKey, String localProfileKey, Rule remoteRule, Rule localRule) {
+        SonarSyncResult sonarSyncResult = getSonarSyncResult(profileKey, localProfileKey, localRule);
+        boolean flag = false;
+        if (!remoteRule.getSeverity().equalsIgnoreCase(localRule.getSeverity())) {
+            //severity不同
+            processSeverityDifference(sonarSyncResult, remoteRule, localRule);
+            flag = true;
+        }
+        if (!remoteRule.getStatus().equalsIgnoreCase(localRule.getStatus())) {
+            //status不同
+            processStatusDifference(sonarSyncResult, remoteRule, localRule);
+            flag = true;
         }
         if (flag) {
             saveOrUpdateSonarSyncResult(sonarSyncResult);
         }
     }
 
-    private void processStatusDifference(SonarSyncResult sonarSyncResult, RuleActives remoteRule, RuleActives localRule) {
-        LOGGER.info("远程规则的status和本地规则status不一样，远程:{},本地:{}", remoteRule, localRule);
-        sonarSyncResult.setRemoteStatus(remoteRule.getRule().getStatus());
-        sonarSyncResult.setLocalStatus(localRule.getRule().getStatus());
+    private void processAbsence(Profile remoteProfile, Profile localProfile, Rule remoteRule) {
+        SonarSyncResult sonarSyncResult = getSonarSyncResult(remoteProfile.getKey(), localProfile.getKey(), remoteRule);
+        //本地没有该规则
+        sonarSyncResult.setAbsence(true);
+        saveOrUpdateSonarSyncResult(sonarSyncResult);
+        LOGGER.info("规则缺失，远程sonar的规则{}，本地sonar上没有", remoteRule);
     }
 
-    private void processSeverityDifference(SonarSyncResult sonarSyncResult, RuleActives remoteRule, RuleActives localRule) {
+    private SonarSyncResult getSonarSyncResult(String remoteProfileKey, String localProfileKey, Rule remoteRule) {
+        SonarSyncResult sonarSyncResult = new SonarSyncResult();
+        sonarSyncResult.setLocalProfileKey(localProfileKey);
+        sonarSyncResult.setRemoteProfileKey(remoteProfileKey);
+        sonarSyncResult.setRuleKey(remoteRule.getKey());
+        sonarSyncResult.setLanguage(remoteRule.getLangName());
+        sonarSyncResult.setCreatedTime(new Date());
+        sonarSyncResult.setUpdatedTime(new Date());
+        return sonarSyncResult;
+    }
+
+    private void processStatusDifference(SonarSyncResult sonarSyncResult, Rule remoteRule, Rule localRule) {
+        LOGGER.info("远程规则的status和本地规则status不一样，远程:{},本地:{}", remoteRule, localRule);
+        sonarSyncResult.setRemoteStatus(remoteRule.getStatus());
+        sonarSyncResult.setLocalStatus(localRule.getStatus());
+    }
+
+    private void processSeverityDifference(SonarSyncResult sonarSyncResult, Rule remoteRule, Rule localRule) {
         LOGGER.info("远程规则的severity和本地规则severity不一样，远程:{},本地:{}", remoteRule, localRule);
-        sonarSyncResult.setLocalSeverity(localRule.getRule().getSeverity());
-        sonarSyncResult.setRemoteSeverity(remoteRule.getRule().getSeverity());
+        sonarSyncResult.setLocalSeverity(localRule.getSeverity());
+        sonarSyncResult.setRemoteSeverity(remoteRule.getSeverity());
     }
 
     private void saveOrUpdateSonarSyncResult(SonarSyncResult sonarSyncResult) {
@@ -151,9 +165,75 @@ public class SonarSyncProcessor {
         return restTemplateComponent.getRestTemplateRemote().getForObject(url, ProfilesActions.class);
     }
 
+    private Rule getAllRemoteRule(String languageName) {
+        String url = "http://%s:%d/api/rules/search?activation=true&languages=?";
+        url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort());
+        return null;//restTemplateComponent.getRestTemplateRemote().getForObject(url,ProfilesActions.class);
+    }
+
+    private ProfilesActions getAllRemoteProfileRule(String languageName) {
+        String url = "http://%s:%d/api/qualityprofiles/search?language=%s";
+        url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort());
+        return restTemplateComponent.getRestTemplateRemote().getForObject(url, ProfilesActions.class);
+    }
+
+    private ProfilesActions getAllLocalProfileRule(String languageName) {
+        String url = "http://%s:%d/api/qualityprofiles/search?language=%s";
+        url = String.format(url, sonarSyncComponent.getLocalHost(), sonarSyncComponent.getLocalPort());
+        return restTemplateComponent.getRestTemplateRemote().getForObject(url, ProfilesActions.class);
+    }
+
+    private ProfilesActions getLocalAllProfilesActions() {
+        String url = "http://%s:%d/api/qualityprofiles/search?defaults=true";
+        url = String.format(url, sonarSyncComponent.getLocalHost(), sonarSyncComponent.getLocalPort());
+        return restTemplateComponent.getRestTemplateLocal().getForObject(url, ProfilesActions.class);
+    }
+
+//    private RulePage getRemoteRulePage(String languageName, int page, int pageSize) {
+//        String url = "http://%s:%d/api/rules/search?activation=true&languages=%s&p=%d&ps=%d&facets=types";
+//        url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort(), languageName, page, pageSize);
+//        return restTemplateComponent.getRestTemplateRemote().getForObject(url, RulePage.class);
+//    }
+//
+//    private RulePage getLocalRulePage(String profileKey, int page, int pageSize) {
+//        String url = "http://%s:%d/api/rules/search?activation=true&languages=%s&p=%d&ps=%d&facets=types";
+//        url = String.format(url, sonarSyncComponent.getLocalHost(), sonarSyncComponent.getLocalPort(), profileKey, page, pageSize);
+//        return restTemplateComponent.getRestTemplateLocal().getForObject(url, RulePage.class);
+//    }
+
     private RulePage getRemoteRulePage(String profileKey, int page, int pageSize) {
         String url = "http://%s:%d/api/rules/search?qprofile=%s&activation=true&p=%d&ps=%d&facets=types";
         url = String.format(url, sonarSyncComponent.getRemoteHost(), sonarSyncComponent.getRemotePort(), profileKey, page, pageSize);
         return restTemplateComponent.getRestTemplateRemote().getForObject(url, RulePage.class);
+    }
+
+    private RulePage getLocalRulePage(String profileKey, int page, int pageSize) {
+        String url = "http://%s:%d/api/rules/search?qprofile=%s&activation=true&p=%d&ps=%d&facets=types";
+        url = String.format(url, sonarSyncComponent.getLocalHost(), sonarSyncComponent.getLocalPort(), profileKey, page, pageSize);
+        return restTemplateComponent.getRestTemplateRemote().getForObject(url, RulePage.class);
+    }
+
+    private LinkedList<Rule> getAllRemoteRulePage(String languageName) {
+        LinkedList<Rule> rules = new LinkedList<>();
+        int page = 1;
+        int pageSize = 200;
+        RulePage rulePage = getRemoteRulePage(languageName, page, pageSize);
+        while (rulePage.getP() <= getTotalPageNum(pageSize, rulePage.getTotal())) {
+            rules.addAll(rulePage.getRules());
+            rulePage = getRemoteRulePage(languageName, rulePage.getP() + 1, pageSize);
+        }
+        return rules;
+    }
+
+    private LinkedList<Rule> getAllLocalRulePage(String lanaguageName) {
+        LinkedList<Rule> rules = new LinkedList<>();
+        int page = 1;
+        int pageSize = 200;
+        RulePage rulePage = getLocalRulePage(lanaguageName, page, pageSize);
+        while (rulePage.getP() <= getTotalPageNum(pageSize, rulePage.getTotal())) {
+            rules.addAll(rulePage.getRules());
+            rulePage = getLocalRulePage(lanaguageName, rulePage.getP() + 1, pageSize);
+        }
+        return rules;
     }
 }
