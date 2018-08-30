@@ -4,11 +4,15 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.xinchen.syn_sonar.SynSonarApplicationTests;
+import com.xinchen.syn_sonar.sonar.SonarSyncComponent;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
+import com.xinchen.syn_sonar.sync.model.RulePage;
 
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
+
 /**
  * @author dmj1161859184@126.com 2018-08-29 21:16
  * @version 1.0
@@ -17,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SonarSyncResultServiceImplTest extends SynSonarApplicationTests {
     @Autowired
     private SonarSyncResultService sonarSyncResultService;
+    @Autowired
+    private SonarSyncComponent sonarSyncComponent;
 
     @Test
     public void test(){
@@ -39,5 +45,14 @@ public class SonarSyncResultServiceImplTest extends SynSonarApplicationTests {
     public void testGetRecentVersion(){
         Integer recentVersion = sonarSyncResultService.getRecentVersion();
         System.out.println(recentVersion);
+    }
+
+    @Test
+    public void test_getRule(){
+        String ruleKey="squid:S00119";
+        String url = sonarSyncComponent.getLocalHttpURL() + "/api/rules/search?rule_key="+ruleKey;
+
+        RulePage rulePage = new RestTemplate().getForObject(url, RulePage.class);
+        System.out.println(rulePage);
     }
 }

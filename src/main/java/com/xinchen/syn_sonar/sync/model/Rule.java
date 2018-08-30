@@ -20,12 +20,18 @@ public class Rule {
     private String key;
     private String repo;
     private String name;
+    private String createdAt;
     private String htmlDesc;
     private String mdDesc;
     private String severity;
     private String status;
+    private String internalKey;
+    private boolean isTemplate;
+    private List<String> tags;
+    private List<String> sysTags;
     private String lang;
     private String langName;
+    private Object params;
     private String type;
     //sonar返回了很多字段，由于没有使用到，所以不添加了
 }

@@ -22,6 +22,7 @@ import javax.persistence.criteria.Root;
 import com.xinchen.syn_sonar.sonar.RestTemplateComponent;
 import com.xinchen.syn_sonar.sonar.SonarSyncCompareProcessor;
 import com.xinchen.syn_sonar.sonar.SonarSyncComponent;
+import com.xinchen.syn_sonar.sonar.SonarSyncProcessor;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
@@ -55,6 +56,8 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     private SonarSyncCompareProcessor sonarSyncCompareProcessor;
     @Autowired
     private SonarSyncComponent sonarSyncComponent;
+    @Autowired
+    private SonarSyncProcessor sonarSyncProcessor;
 
     @Override
     public Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync) {
@@ -83,9 +86,7 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
 
     @Override
     public void sync(String... languages) {
-        for (String language : languages) {
-            sonarSyncCompareProcessor.sync(language);
-        }
+        sonarSyncProcessor.sync(languages);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         Object maxVersion = query.getSingleResult();
         maxVersion = maxVersion == null ? 0 : maxVersion;
         if (maxVersion instanceof BigInteger) {
-            return ((BigInteger)maxVersion).intValue();
+            return ((BigInteger) maxVersion).intValue();
         }
         return (Integer) maxVersion;
     }
