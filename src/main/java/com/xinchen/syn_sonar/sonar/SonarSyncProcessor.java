@@ -49,8 +49,23 @@ public class SonarSyncProcessor {
         LOGGER.info("同步任务开始执行");
         List<Profile> remoteProfiles = sonarSyncCompareProcessor.getRemoteAllProfilesActions().getProfiles();
         List<Profile> localProfiles = sonarSyncCompareProcessor.getLocalAllProfilesActions().getProfiles();
+
         for (String languageName : languageNames) {
+            languageExist(remoteProfiles, languageName);
             doSync(remoteProfiles, localProfiles, languageName);
+        }
+    }
+
+    private void languageExist(List<Profile> remoteProfiles, String languageName) {
+        boolean flag = true;
+        for (Profile profile : remoteProfiles) {
+            if (profile.getLanguageName().equalsIgnoreCase(languageName)) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) {
+            throw new RuntimeException("语言不存在");
         }
     }
 
