@@ -29,14 +29,14 @@ public interface SonarSyncResultService {
     Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync);
 
     /**
-     * 同步规则
+     * 同步规则，不记录数据库，拿远程的规则，之后再拿本地的规则，比较之后将本地的进行同步
      *
      * @param languages
      */
     void sync(String... languages);
 
     /**
-     * 规则比较，记录到日志和数据库
+     * 规则比较，只是记录到日志和数据库
      */
     void compare();
 

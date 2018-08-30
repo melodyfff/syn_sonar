@@ -66,11 +66,11 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     @Override
     public List<SonarSyncResult> findAllByLanguage(final String language) {
         String languageName = language;
-        Sort orders = new Sort(Sort.Direction.DESC, "created_time");
+        Sort orders = new Sort(Sort.Direction.DESC, "createdTime");
         return sonarSyncResultRepository.findAll(new Specification<SonarSyncResult>() {
             @Override
             public Predicate toPredicate(Root<SonarSyncResult> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-                Predicate languagePredicate = criteriaBuilder.equal(root.get("language").as(String.class), languageName);
+                Predicate languagePredicate = criteriaBuilder.equal(root.get("language").as(String.class), languageName.toLowerCase());
                 return criteriaBuilder.and(languagePredicate);
             }
         }, orders);
@@ -85,7 +85,7 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
 
     @Override
     public void compare() {
-        sonarSyncProcessor.process();
+        sonarSyncProcessor.compare();
     }
 
     @Override

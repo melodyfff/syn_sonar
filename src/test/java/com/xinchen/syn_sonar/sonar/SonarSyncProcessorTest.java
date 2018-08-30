@@ -18,7 +18,7 @@ public class SonarSyncProcessorTest extends SynSonarApplicationTests {
 
     @Test
     public void test_process(){
-        sonarSyncProcessor.process();
+        sonarSyncProcessor.compare();
     }
 
     @Test

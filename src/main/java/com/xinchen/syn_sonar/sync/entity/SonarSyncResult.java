@@ -34,18 +34,23 @@ public class SonarSyncResult implements Serializable {
     private Long id;
     @Column(name = "language")
     private String language;
+    //规则名称
+    @Column(name = "rule_name")
+    private String ruleName;
     @Column(name = "mark")
     private String mark;
     @Column(name = "updated_time")
     private Date updatedTime;
     @Column(name = "created_time")
     private Date createdTime;
+    //表示本地没有该规则
     @Column(name = "absence")
     private Boolean absence;
+    //表示远程规则与本地规则不一样
+    @Column(name = "difference")
+    private Boolean difference;
     @Column(name = "local_profile_key")
     private String localProfileKey;
-//    @Column(name = "profile_key")
-//    private String profileKey;
     @Column(name = "remote_profile_key")
     private String remoteProfileKey;
     @Column(name = "rule_key")
@@ -58,4 +63,14 @@ public class SonarSyncResult implements Serializable {
     private String localStatus;
     @Column(name = "remote_status")
     private String remoteStatus;
+
+    //本地规则的type
+    @Column(name = "local_type")
+    private String localType;
+    //远程规则的type
+    @Column(name = "remote_type")
+    private String remoteType;
+    //该规则在否是需要激活
+    @Column(name = "need_local_active")
+    private Boolean needLocalActive = false;
 }

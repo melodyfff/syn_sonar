@@ -29,7 +29,7 @@ public class SonarSyncResultServiceImplTest extends SynSonarApplicationTests {
 
     @Test
     public void test_getByLanguage(){
-        List<SonarSyncResult> result = sonarSyncResultService.findAllByLanguage("Java");
+        List<SonarSyncResult> result = sonarSyncResultService.findAllByLanguage("java");
         System.out.println(result.size());
         System.out.println(result);
     }
