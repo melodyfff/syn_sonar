@@ -73,4 +73,8 @@ public class SonarSyncResult implements Serializable {
     //该规则在否是需要激活
     @Column(name = "need_local_active")
     private Boolean needLocalActive = false;
+
+    //入库版本号，执行批次号
+    @Column(name = "version")
+    private Long version;
 }

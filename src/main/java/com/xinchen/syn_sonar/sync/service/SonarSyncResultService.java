@@ -5,6 +5,7 @@
  */
 package com.xinchen.syn_sonar.sync.service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
@@ -41,6 +42,8 @@ public interface SonarSyncResultService {
     void compare();
 
     List<SonarSyncResult> findAllByLanguage(final String language);
+
+    Integer getRecentVersion();
 
     /**
      * 保存SonarSyncResult

@@ -1,5 +1,6 @@
 package com.xinchen.syn_sonar.sync.service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import com.xinchen.syn_sonar.SynSonarApplicationTests;
@@ -32,5 +33,11 @@ public class SonarSyncResultServiceImplTest extends SynSonarApplicationTests {
         List<SonarSyncResult> result = sonarSyncResultService.findAllByLanguage("java");
         System.out.println(result.size());
         System.out.println(result);
+    }
+
+    @Test
+    public void testGetRecentVersion(){
+        Integer recentVersion = sonarSyncResultService.getRecentVersion();
+        System.out.println(recentVersion);
     }
 }

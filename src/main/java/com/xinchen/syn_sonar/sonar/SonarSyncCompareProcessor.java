@@ -8,10 +8,7 @@ package com.xinchen.syn_sonar.sonar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadFactory;
-import com.xinchen.syn_sonar.sonar.thread.CustomizedThreadPoolExecutor;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.model.Profile;
 import com.xinchen.syn_sonar.sync.model.ProfilesActions;
@@ -31,12 +28,9 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  */
 @Component
-public class SonarSyncProcessor {
+public class SonarSyncCompareProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SonarSyncComponent.class);
-    /**
-     * 有意的设置为2
-     */
-    private static final ThreadPoolExecutor poolExecutor = CustomizedThreadPoolExecutor.customizedThreadPoolExecutor(2, 2, CustomizedThreadFactory.customizedThreadFactory());
+    private ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
     @Autowired
     private RestTemplateComponent restTemplateComponent;
@@ -125,6 +119,7 @@ public class SonarSyncProcessor {
      * 同步远程服务器和本地服务器上的规则
      */
     public void compare() {
+        threadLocal.set(sonarSyncResultService.getRecentVersion().longValue() + 1);
         long startTime = System.currentTimeMillis();
         LOGGER.info("同步任务开始执行");
         List<Profile> remoteProfiles = getRemoteAllProfilesActions().getProfiles();
@@ -177,6 +172,7 @@ public class SonarSyncProcessor {
             }
         }
         LOGGER.info("同步任务结束执行，用时{}毫秒", (System.currentTimeMillis() - startTime));
+        threadLocal.remove();
     }
 
     private void processLocalInactiveRule(Profile remoteProfile, Profile localProfile, Rule remoteRule, Rule localInactiveRule) {
@@ -299,8 +295,9 @@ public class SonarSyncProcessor {
 
     private void saveOrUpdateSonarSyncResult(SonarSyncResult sonarSyncResult) {
         //一定要删除后再添加，不然很有可能会堆积
-        sonarSyncResultService.deleteSonarSyncResult(sonarSyncResult.getRuleKey());
+        //sonarSyncResultService.deleteSonarSyncResult(sonarSyncResult.getRuleKey());
         sonarSyncResult.setLanguage(sonarSyncResult.getLanguage().toLowerCase());
+        sonarSyncResult.setVersion(threadLocal.get());
         sonarSyncResultService.saveSonarSyncResult(sonarSyncResult);
     }
 

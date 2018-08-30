@@ -5,20 +5,23 @@
  */
 package com.xinchen.syn_sonar.sync.service;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import com.xinchen.syn_sonar.sonar.RestTemplateComponent;
+import com.xinchen.syn_sonar.sonar.SonarSyncCompareProcessor;
 import com.xinchen.syn_sonar.sonar.SonarSyncComponent;
-import com.xinchen.syn_sonar.sonar.SonarSyncProcessor;
 import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
@@ -45,9 +48,11 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     @Autowired
     private SonarSyncResultRepository sonarSyncResultRepository;
     @Autowired
+    private EntityManager entityManager;
+    @Autowired
     private RestTemplateComponent restTemplateComponent;
     @Autowired
-    private SonarSyncProcessor sonarSyncProcessor;
+    private SonarSyncCompareProcessor sonarSyncCompareProcessor;
     @Autowired
     private SonarSyncComponent sonarSyncComponent;
 
@@ -77,16 +82,29 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     }
 
     @Override
-    public void sync(String... languages){
+    public void sync(String... languages) {
         for (String language : languages) {
-            sonarSyncProcessor.sync(language);
+            sonarSyncCompareProcessor.sync(language);
         }
     }
 
     @Override
     public void compare() {
-        sonarSyncProcessor.compare();
+        sonarSyncCompareProcessor.compare();
     }
+
+    @Override
+    public Integer getRecentVersion() {
+        String sql = "select max(version) as maxVersion from sonar_sync_result";
+        Query query = entityManager.createNativeQuery(sql);
+        Object maxVersion = query.getSingleResult();
+        maxVersion = maxVersion == null ? 0 : maxVersion;
+        if (maxVersion instanceof BigInteger) {
+            return ((BigInteger)maxVersion).intValue();
+        }
+        return (Integer) maxVersion;
+    }
+
 
     @Override
     public void activeLocalRule(String profileKey, String ruleKey) {

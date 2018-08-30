@@ -12,13 +12,13 @@ import org.springframework.web.client.RestTemplate;
  * @version 1.0
  * @since 1.0
  */
-public class SonarSyncProcessorTest extends SynSonarApplicationTests {
+public class SonarSyncCompareProcessorTest extends SynSonarApplicationTests {
     @Autowired
-    private SonarSyncProcessor sonarSyncProcessor;
+    private SonarSyncCompareProcessor sonarSyncCompareProcessor;
 
     @Test
     public void test_process(){
-        sonarSyncProcessor.compare();
+        sonarSyncCompareProcessor.compare();
     }
 
     @Test
