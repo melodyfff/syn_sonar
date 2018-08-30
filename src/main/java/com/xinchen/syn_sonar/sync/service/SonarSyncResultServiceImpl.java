@@ -5,11 +5,9 @@
  */
 package com.xinchen.syn_sonar.sync.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +23,6 @@ import com.xinchen.syn_sonar.sync.entity.SonarSyncResult;
 import com.xinchen.syn_sonar.sync.repository.SonarSyncResultRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -70,28 +66,36 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     @Override
     public List<SonarSyncResult> findAllByLanguage(final String language) {
         String languageName = language;
+        Sort orders = new Sort(Sort.Direction.DESC, "created_time");
         return sonarSyncResultRepository.findAll(new Specification<SonarSyncResult>() {
             @Override
             public Predicate toPredicate(Root<SonarSyncResult> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
                 Predicate languagePredicate = criteriaBuilder.equal(root.get("language").as(String.class), languageName);
                 return criteriaBuilder.and(languagePredicate);
             }
-        });
+        }, orders);
     }
 
     @Override
-    public void compare(){
+    public void sync(String... languages){
+        for (String language : languages) {
+            sonarSyncProcessor.sync(language);
+        }
+    }
+
+    @Override
+    public void compare() {
         sonarSyncProcessor.process();
     }
 
     @Override
     public void activeLocalRule(String profileKey, String ruleKey) {
-        String url = sonarSyncComponent.getLocalHttpURL()+"/api/qualityprofiles/activate_rule";
+        String url = sonarSyncComponent.getLocalHttpURL() + "/api/qualityprofiles/activate_rule";
         url = String.format(url, profileKey, ruleKey);
-        Map<String,String> map=new HashMap<>();
-        map.put("key",profileKey);
-        map.put("rule",ruleKey);
-        restTemplateComponent.getRestTemplateLocal().postForLocation(url,map);
+        Map<String, String> map = new HashMap<>();
+        map.put("key", profileKey);
+        map.put("rule", ruleKey);
+        restTemplateComponent.getRestTemplateLocal().postForLocation(url, map);
     }
 
     @Override
@@ -112,9 +116,9 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
     }
 
     @Override
-    public void changeLocalSeverity(String profile,String ruleKey, String severity){
-        String url=sonarSyncComponent.getLocalHttpURL()+ "/api/qualityprofiles/activate_rule";
-        url = String.format(url,ruleKey,severity);
+    public void changeLocalSeverity(String profile, String ruleKey, String severity) {
+        String url = sonarSyncComponent.getLocalHttpURL() + "/api/qualityprofiles/activate_rule";
+        url = String.format(url, ruleKey, severity);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -124,17 +128,17 @@ public class SonarSyncResultServiceImpl implements SonarSyncResultService {
         String base64UserMsg = Base64.getEncoder().encodeToString(userMsg.getBytes());
         //headers.add("User-Agent", "curl/7.58.0");
         headers.add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36");
-        headers.add("Authorization", "Basic "+base64UserMsg);
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
-        map.put("profile_key",Arrays.asList(profile));
-        map.put("rule_key",Arrays.asList(ruleKey));
-        map.put("severity",Arrays.asList(severity));
+        headers.add("Authorization", "Basic " + base64UserMsg);
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+        map.put("profile_key", Arrays.asList(profile));
+        map.put("rule_key", Arrays.asList(ruleKey));
+        map.put("severity", Arrays.asList(severity));
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
-        ResponseEntity<Void> response = restTemplateComponent.getRestTemplateLocal().postForEntity( url, request,Void.class);
+        ResponseEntity<Void> response = restTemplateComponent.getRestTemplateLocal().postForEntity(url, request, Void.class);
     }
 
-    public void changeLocalStatus(String ruleKey,String status){
+    public void changeLocalStatus(String ruleKey, String status) {
         //TODO
     }
 

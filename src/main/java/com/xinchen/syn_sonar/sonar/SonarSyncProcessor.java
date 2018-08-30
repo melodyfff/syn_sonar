@@ -46,6 +46,76 @@ public class SonarSyncProcessor {
     @Autowired
     private SonarSyncResultService sonarSyncResultService;
 
+    //根据语言来同步
+    public void sync(String... languageNames){
+        LOGGER.info("同步任务开始执行");
+        List<Profile> remoteProfiles = getRemoteAllProfilesActions().getProfiles();
+        List<Profile> localProfiles = getLocalAllProfilesActions().getProfiles();
+
+
+
+        for (Profile remoteProfile : remoteProfiles) {
+            Profile localProfile = getLocalProfile(remoteProfile, localProfiles);
+            if (localProfile == null) {
+                LinkedList<Rule> allRemoteRulePage = getAllRemoteRulePage(remoteProfile.getKey());
+                for (Rule rule : allRemoteRulePage) {
+                    processAbsence(remoteProfile, localProfile, rule);
+                }
+            } else {
+                try {
+                    LinkedList<Rule> allRemoteRulePage = getAllRemoteRulePage(remoteProfile.getKey());
+                    LinkedList<Rule> allLocalRulePage = getAllLocalRulePage(localProfile.getKey());
+                    for (Rule remoteRule : allRemoteRulePage) {
+                        boolean flag = false;
+                        Rule localRule = null;
+                        for (int i = 0; i < allLocalRulePage.size(); i++) {
+                            localRule = allLocalRulePage.get(i);
+                            if (remoteRule.getKey().equalsIgnoreCase(localRule.getKey())) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag) {
+                            processDifference(remoteProfile.getKey(), localProfile.getKey(), remoteRule, localRule);
+                        } else {
+                            processAbsence(remoteProfile, localProfile, remoteRule);
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    private void doSync(List<Profile> remoteProfiles,List<Profile> localProfiles,String languageName) {
+        Profile remoteProfile = getRemoteProfileWithLanaguageName(remoteProfiles, languageName);
+        Profile localProfile = getLocalProfileWithLanguageName(localProfiles, languageName);
+        if (localProfile == null) {
+            //本地没有该语言规则,需要全部同步到本地
+        } else {
+            //远程
+        }
+    }
+
+    private Profile getRemoteProfileWithLanaguageName(List<Profile> remoteProfiles,String languageName) {
+        for (Profile profile : remoteProfiles) {
+            if (profile.getLanguageName().equalsIgnoreCase(languageName)) {
+                return profile;
+            }
+        }
+        throw new RuntimeException("远程没有该语言的规则");
+    }
+
+    private Profile getLocalProfileWithLanguageName(List<Profile> localProfiles,String languageName) {
+        for (Profile profile : localProfiles) {
+            if (profile.getLanguageName().equalsIgnoreCase(languageName)) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
     /**
      * 同步远程服务器和本地服务器上的规则
      */

@@ -29,6 +29,13 @@ public interface SonarSyncResultService {
     Page<SonarSyncResult> findByLanguage(Integer page, Integer size, SonarSyncResult sonarSync);
 
     /**
+     * 同步规则
+     *
+     * @param languages
+     */
+    void sync(String... languages);
+
+    /**
      * 规则比较，记录到日志和数据库
      */
     void compare();
