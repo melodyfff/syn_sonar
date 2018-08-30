@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -42,7 +43,7 @@ import org.springframework.util.MultiValueMap;
  */
 @Service("sonarSyncResultService")
 public class SonarSyncResultServiceImpl implements SonarSyncResultService {
-    @Autowired
+    @Resource
     private SonarSyncResultRepository sonarSyncResultRepository;
     @Autowired
     private RestTemplateComponent restTemplateComponent;

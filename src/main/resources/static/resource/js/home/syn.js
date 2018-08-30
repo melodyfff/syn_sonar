@@ -41,6 +41,10 @@ $(function () {
             if (isConfirm) {
                 var code = isConfirm.value;
                 // console.log(code);
+                $.bootstrapLoading.start({ loadingTips: "正在处理数据，请稍候..." });
+                setTimeout(function(){
+                    // 方法B()
+                },5000);
                 $.ajax({
                     type: "POST",
                     data: {"code":code},
@@ -57,6 +61,9 @@ $(function () {
                             location.href = location.href;
                         });
                     },
+                    complete: function () {
+                        $.bootstrapLoading.end();
+                    }
                     // error: function (result) {
                     //     console.log(result);
                     //     console.log(result.status);
