@@ -162,7 +162,7 @@ public class SonarServiceImpl implements SonarService {
                 List<NameValuePair> params = Lists.newArrayList();
                 params.add(new BasicNameValuePair("profile_key", x.getProfileKey()));
                 params.add(new BasicNameValuePair("rule_key", x.getKey()));
-                params.add(new BasicNameValuePair("severity", "INFO"));
+                params.add(new BasicNameValuePair("severity", x.getSeverity()));
                 try {
                     doExecutePost(adressComponent.getLocalUrl(), ApiContants.API_ACTIVATE_RULE, params);
                     LOGGER.info("激活/同步规则成功 , [{}] - key:[{}] ... ", x.getName(), x.getKey());
