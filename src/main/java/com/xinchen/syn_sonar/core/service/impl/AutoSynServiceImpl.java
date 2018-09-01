@@ -1,5 +1,6 @@
 package com.xinchen.syn_sonar.core.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.xinchen.syn_sonar.core.entity.BaseProfile;
 import com.xinchen.syn_sonar.core.model.ProfilesModel;
 import com.xinchen.syn_sonar.core.model.RulesModel;
@@ -48,25 +49,27 @@ public class AutoSynServiceImpl implements AutoSynService {
 
                     // 比较本地和远程（本地有而远程没有的）
                     final List<RulesModel> more = sonarService.compareRule(localList, remoteList);
-                    LOGGER.info("检测语言 [{}]  - 本地有而远程没有的数目为 [{}] , 具体为：{}", x.getProfiles(), more.size(), more);
+                    LOGGER.info("检测语言 [{}]  - 本地有而远程没有的数目为 [{}] , 具体为：{}", x.getProfiles(), more.size(), JSONObject.toJSON(more));
                     // 比较远程和本地（远程和本地存在差异的）
                     final List<RulesModel> diff = sonarService.compareRule(remoteList, localList);
                     // 此处对比完差异化，profileskey值为远程服务器中的，需要替换为本地环境中的，不然修改不生效
                     diff.forEach((y)->y.setProfileKey(localList.get(0).getProfileKey()));
 
-                    LOGGER.info("检测语言 [{}]  -差异规则数目为 [{}] , 具体为：{}", x.getProfiles(), diff.size(), diff);
+                    LOGGER.info("检测语言 [{}]  -差异规则数目为 [{}] , 具体为：{}", x.getProfiles(), diff.size(), JSONObject.toJSON(diff));
                     if (synchronize) {
                         // 将和远程差异的部分进行同步，多出来的部分进行禁止
                         sonarService.updateRules(diff, more);
                     }
 
                 } catch (IOException | AuthenticationException e) {
+                    e.printStackTrace();
                     LOGGER.error("检测失败：{}", e.getMessage());
                 }
             });
 
 
         } catch (Exception e) {
+            e.printStackTrace();
             LOGGER.error("检测失败：{}", e.getMessage());
         }
     }
