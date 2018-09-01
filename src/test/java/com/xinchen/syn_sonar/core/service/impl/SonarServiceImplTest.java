@@ -34,9 +34,11 @@ public class SonarServiceImplTest extends SynSonarApplicationTests {
     public void compareRule() throws IOException {
         List<RulesModel> local = Lists.newArrayList();
         RulesModel rulesModel1 = new RulesModel();
+        rulesModel1.setProfileKey("1");
         rulesModel1.setName("Lines should not be too long");
         rulesModel1.setSeverity("MAJOR");
         RulesModel rulesModel2 = new RulesModel();
+        rulesModel2.setProfileKey("1");
         rulesModel2.setName("Sections of code should not be \"commented out\"");
         rulesModel2.setSeverity("BLOCKER");
         local.add(rulesModel1);
@@ -44,9 +46,11 @@ public class SonarServiceImplTest extends SynSonarApplicationTests {
 
         List<RulesModel> remote = Lists.newArrayList();
         RulesModel rulesModel3 = new RulesModel();
+        rulesModel2.setProfileKey("3");
         rulesModel3.setName("Lines should not be too long");
         rulesModel3.setSeverity("MAJOR");
         RulesModel rulesModel4 = new RulesModel();
+        rulesModel2.setProfileKey("4");
         rulesModel4.setName("Sections of code should not be \"commented out\"");
         rulesModel4.setSeverity("BLOCKER1");
         remote.add(rulesModel3);

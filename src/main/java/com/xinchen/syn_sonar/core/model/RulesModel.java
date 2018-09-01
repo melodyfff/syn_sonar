@@ -41,6 +41,6 @@ public class RulesModel implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, key, severity, type, status);
+        return Objects.hash( key, severity);
     }
 }

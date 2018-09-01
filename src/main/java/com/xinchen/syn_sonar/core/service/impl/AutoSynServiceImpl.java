@@ -46,20 +46,26 @@ public class AutoSynServiceImpl implements AutoSynService {
                 try {
                     List<RulesModel> localList = sonarService.searchRulesByFileNameLocal(localMap.get(x.getProfiles()));
                     List<RulesModel> remoteList = sonarService.searchRulesByFileNameRemote(remoteMap.get(x.getProfiles()));
-
-                    // 比较本地和远程（本地有而远程没有的）
-                    final List<RulesModel> more = sonarService.compareRule(localList, remoteList);
-                    LOGGER.info("检测语言 [{}]  - 本地有而远程没有的数目为 [{}] , 具体为：{}", x.getProfiles(), more.size(), JSONObject.toJSON(more));
+                    // 默认本地有规则
+                    final String profileKey = localList.get(0).getProfileKey();
                     // 比较远程和本地（远程和本地存在差异的）
-                    final List<RulesModel> diff = sonarService.compareRule(remoteList, localList);
                     // 此处对比完差异化，profileskey值为远程服务器中的，需要替换为本地环境中的，不然修改不生效
-                    diff.forEach((y)->y.setProfileKey(localList.get(0).getProfileKey()));
+                    final List<RulesModel> diff = sonarService.compareRule(remoteList, localList);
+                    diff.forEach((y)->y.setProfileKey(profileKey));
 
                     LOGGER.info("检测语言 [{}]  -差异规则数目为 [{}] , 具体为：{}", x.getProfiles(), diff.size(), JSONObject.toJSON(diff));
                     if (synchronize) {
                         // 将和远程差异的部分进行同步，多出来的部分进行禁止
-                        sonarService.updateRules(diff, more);
+                        sonarService.updateRules(diff, null);
+
+                        localList = sonarService.searchRulesByFileNameLocal(localMap.get(x.getProfiles()));
+                        remoteList = sonarService.searchRulesByFileNameRemote(remoteMap.get(x.getProfiles()));
                     }
+
+                    // 比较本地和远程（本地有而远程没有的）
+                    final List<RulesModel> more = sonarService.compareRule(localList, remoteList);
+                    LOGGER.info("检测语言 [{}]  - 本地有而远程没有的数目为 [{}] , 具体为：{}", x.getProfiles(), more.size(), JSONObject.toJSON(more));
+                    sonarService.updateRules(null, more);
 
                 } catch (IOException | AuthenticationException e) {
                     e.printStackTrace();

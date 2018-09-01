@@ -3,6 +3,7 @@ package com.xinchen.syn_sonar.core.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.collect.Maps;
 import com.xinchen.syn_sonar.core.api.AdressComponent;
 import com.xinchen.syn_sonar.core.api.ApiContants;
 import com.xinchen.syn_sonar.core.entity.BaseProfile;
@@ -111,6 +112,7 @@ public class SonarServiceImpl implements SonarService {
         int page = 1;
 
         List<RulesModel> resultList = Lists.newArrayList();
+        Map<String,String> activesMap = Maps.newHashMap();
 
         while (flag) {
             // 构建查询条件
@@ -119,23 +121,38 @@ public class SonarServiceImpl implements SonarService {
             params.add(new BasicNameValuePair("ps", "500"));
             params.add(new BasicNameValuePair("activation", "true"));
             params.add(new BasicNameValuePair("qprofile", key));
+            params.add(new BasicNameValuePair("s", "name"));
+            params.add(new BasicNameValuePair("f", "name,lang,langName,sysTags,tags,status,severity,isTemplate,templateKey,actives,params,isTemplate,severity"));
+
             params.add(new BasicNameValuePair("p", Objects.toString(page)));
             // 调用API查询
             HttpEntity httpEntity = doExecuteGet(domain, ApiContants.API_SEARCH_RULE, params);
             // 返回结果处理
             Map parse = (Map) JSONObject.parse(EntityUtils.toString(httpEntity, "UTF-8"));
             List<RulesModel> rules = (List<RulesModel>) parse.get("rules");
+            Map<String,List<Map>> temp = (Map)parse.get("actives");
+            temp.forEach((x,y)->{
+                y.forEach((r)->{
+                    if (null!=r.get("severity")){
+                        activesMap.put(x, r.get("severity").toString());
+                    }
+                });
+            });
             if (rules.isEmpty()) {
                 flag = false;
             } else {
-                resultList.addAll(JSON.parseObject(rules.toString(), new TypeReference<List<RulesModel>>() {
-                }));
+                resultList.addAll(JSON.parseObject(rules.toString(), new TypeReference<List<RulesModel>>() {}));
                 page += 1;
             }
         }
         LOGGER.info("获取 key为 [{}] 的规则结束 ,共 [{}] ,条", key, resultList.size());
         // 设置语言的查找ProfileKey值
-        resultList.forEach((x) -> x.setProfileKey(key));
+        resultList.forEach((x) -> {
+            x.setProfileKey(key);
+            if (activesMap.get(x.getKey())!=null){
+                x.setSeverity(activesMap.get(x.getKey()));
+            }
+        });
         return resultList;
     }
 
