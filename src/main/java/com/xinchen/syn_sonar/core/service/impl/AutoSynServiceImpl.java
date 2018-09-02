@@ -2,10 +2,12 @@ package com.xinchen.syn_sonar.core.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.xinchen.syn_sonar.core.entity.AutoSynLog;
 import com.xinchen.syn_sonar.core.entity.AutoSynResult;
 import com.xinchen.syn_sonar.core.entity.BaseProfile;
 import com.xinchen.syn_sonar.core.model.ProfilesModel;
 import com.xinchen.syn_sonar.core.model.RulesModel;
+import com.xinchen.syn_sonar.core.repository.AutoSynLogRepository;
 import com.xinchen.syn_sonar.core.repository.AutoSynResultRepository;
 import com.xinchen.syn_sonar.core.repository.BaseProfileRepository;
 import com.xinchen.syn_sonar.core.service.AutoSynService;
@@ -36,6 +38,9 @@ public class AutoSynServiceImpl implements AutoSynService {
     private AutoSynResultRepository autoSynResultRepository;
 
     @Resource
+    private AutoSynLogRepository autoSynLogRepository;
+
+    @Resource
     private SonarService sonarService;
 
     @Resource
@@ -52,6 +57,7 @@ public class AutoSynServiceImpl implements AutoSynService {
 
             // 时间标识位
             Date date = new Date();
+
             // 入库结果
             List<AutoSynResult> autoSynResults = Lists.newArrayList();
 
@@ -73,6 +79,7 @@ public class AutoSynServiceImpl implements AutoSynService {
                         autoSynResult.setRuleKey(result.getKey());
                         autoSynResult.setRuleName(result.getName());
                         autoSynResult.setSeverity(result.getSeverity());
+                        autoSynResult.setLanguage(x.getProfiles());
                         autoSynResults.add(autoSynResult);
                     }));
 
@@ -99,6 +106,7 @@ public class AutoSynServiceImpl implements AutoSynService {
                         autoSynResult.setRuleKey(result2.getKey());
                         autoSynResult.setRuleName(result2.getName());
                         autoSynResult.setSeverity(result2.getSeverity());
+                        autoSynResult.setLanguage(x.getProfiles());
                         autoSynResults.add(autoSynResult);
                     });
 
@@ -115,7 +123,8 @@ public class AutoSynServiceImpl implements AutoSynService {
                     LOGGER.error("检测失败：{}", e.getMessage());
                 }
             });
-
+            // 记录操作日志
+//            autoSynLogRepository.save(new AutoSynLog(date));
 
         } catch (Exception e) {
             e.printStackTrace();

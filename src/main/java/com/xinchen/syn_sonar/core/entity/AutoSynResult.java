@@ -5,11 +5,15 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Proxy;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
@@ -55,5 +59,11 @@ public class AutoSynResult implements Serializable {
     @Column(name = "is_more")
     @JSONField(ordinal = 6)
     private boolean isMore;
+
+    /** 是否是多出来的 （TRUE:local比remote多的   FALSE:remote比local少的） **/
+    @Column(name = "language")
+    @JSONField(ordinal = 6)
+    private String language;
+
 
 }
