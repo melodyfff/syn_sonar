@@ -16,8 +16,8 @@ import javax.annotation.Resource;
  */
 @Component
 public class AutoSynTask {
-    @Resource
-    private EmailService emailService;
+//    @Resource
+//    private EmailService emailService;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AutoSynTask.class);
 
@@ -30,7 +30,7 @@ public class AutoSynTask {
         LOGGER.info("---------------------");
 
         // 发送检测邮件
-        emailService.sendHtmlEmail(new String[]{"307208327@qq.com"},null,"Sonar规则自动检测","mail.ftl");
+//        emailService.sendHtmlEmail(new String[]{"307208327@qq.com"},null,"Sonar规则自动检测","mail.ftl");
 
 
         LOGGER.info("---------------------");
