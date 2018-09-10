@@ -29,6 +29,7 @@ $(function () {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             preConfirm: function(password) {
+                console.log(password)
                 return new Promise(function(resolve, reject) {
                     setTimeout(function() {
                         if (password) {

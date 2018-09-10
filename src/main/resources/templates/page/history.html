@@ -1,0 +1,63 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th width="20%">执行时间</th>
+        <th width="10%">语言</th>
+        <th width="25%">规则名</th>
+        <th width="25%">规则键</th>
+        <th width="10%">差异/多出</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="obj : ${datas}">
+
+        <td th:text="${#dates.format(obj.createDate, 'dd/MMM/yyyy HH:mm:ss')}">${obj.createDate}</td>
+        <td th:text="${obj.language}">${obj.language}</td>
+        <td th:text="${obj.ruleName}">${obj.ruleName}</td>
+        <td th:text="${obj.ruleKey}">${obj.ruleKey}</td>
+        <td th:text="${obj.isMore()}?'多出':'差异'">${obj.isMore}</td>
+    </tr>
+    </tbody>
+</table>
+<!--&lt;!&ndash; 总页数 &ndash;&gt;-->
+<!--<span th:text="${datas.totalPages}"></span>-->
+<!--&lt;!&ndash; 每页显示 &ndash;&gt;-->
+<!--<span th:text="${datas.size}"></span>-->
+<!--&lt;!&ndash; 当前页 &ndash;&gt;-->
+<!--<span th:text="${datas.pageable.pageNumber}"></span>-->
+<script th:inline="javascript">
+    var result = [[${datas}]];
+    $('#pageLimit').bootstrapPaginator({
+        bootstrapMajorVersion: 3,//bootstrap版本
+        currentPage: result.pageable.pageNumber==0?1:result.pageable.pageNumber+1,//当前页码
+        totalPages: result.totalPages,//总页数（后台传过来的数据）
+        search: true, //显示搜索框
+        numberOfPages: 6,//一页显示几个按钮
+        itemTexts: function (type, page, current) {
+            switch (type) {
+                case "first": return "首页";
+                case "prev": return "上一页";
+                case "next": return "下一页";
+                case "last": return "末页";
+                case "page": return page;
+            }
+        },//改写分页按钮字样
+        onPageClicked: function (event, originalEvent, type, page) {
+            $.ajax({
+                url: baseUrl + '/history',
+                type: 'post',
+                data: {page: page-1},
+                // dataType: 'json',
+                success: function (data) {
+                    $('#historyList').empty().html(data);
+                },
+                // error: function (result) {
+                //     console.log(result);
+                //     console.log(result.status);
+                //     console.log(result.responseJSON.message);
+                // }
+            });
+        }
+    });
+</script>
