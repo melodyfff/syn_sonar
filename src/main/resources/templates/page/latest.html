@@ -1,0 +1,20 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<h2 th:text="'同步结果 - '+${#dates.format(time, 'dd/MMM/yyyy HH:mm:ss')}"></h2>
+<div class="row">
+    <!-- Pricing Plans Wrapper -->
+    <div class="pricing-wrapper col-md-12" >
+        <div class="pricing-plan" th:each="languageMap : ${maps}">
+            <div class="ribbon-wrapper">
+                <div class="price-ribbon ribbon-green" th:if="${{languageMap.value.size()}} eq 0">Pass</div>
+                <div class="price-ribbon ribbon-orange" th:if="${{languageMap.value.size()}} ne 0">Wrong</div>
+            </div>
+            <h2 class="pricing-plan-title" th:text="${{languageMap.key}}"></h2>
+            <p class="pricing-plan-price" th:text="${{languageMap.value.size()}}"></p>
+            <ul class="pricing-plan-features" th:each="row : ${languageMap.value}">
+                <li><strong th:text="${row.isMore()}?'多出：'+${row.ruleKey}:'差异：'+${row.ruleKey}"></strong></li>
+            </ul>
+        </div>
+        <!-- End Pricing Plan -->
+    </div>
+    <!-- End Pricing Plans Wrapper -->
+</div>

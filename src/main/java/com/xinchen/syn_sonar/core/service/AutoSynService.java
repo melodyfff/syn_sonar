@@ -12,7 +12,7 @@ public interface AutoSynService {
      * 对比差异,自动同步
      * @param synchronize 是否对比完自动同步
      */
-    void synchronize(boolean synchronize);
+    void synchronize(boolean synchronize) throws Exception;
 
 
 }

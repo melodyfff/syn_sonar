@@ -35,8 +35,9 @@ public class RulesModel implements Serializable {
         if (this == o) {return true;}
         if (o == null || getClass() != o.getClass()) {return false;}
         RulesModel that = (RulesModel) o;
-        return Objects.equals(name, that.name) &&
-                Objects.equals(severity, that.severity);
+        return (Objects.equals(name, that.name) &&
+                Objects.equals(severity, that.severity))|(Objects.equals(key, that.key) &&
+                Objects.equals(severity, that.severity));
     }
 
     @Override

@@ -35,7 +35,7 @@ public class AutoSynController {
 
     @PostMapping(value = "/autoSyn")
     public ResponseEntity autoSyn(HttpServletRequest request,
-                                  @RequestParam(name = "code", defaultValue = "") String code) {
+                                  @RequestParam(name = "code", defaultValue = "") String code) throws Exception {
 
         LOGGER.info(">>>>>>>>触发一键同步");
         final List<ActivationCode> all = codeRepository.findAll();

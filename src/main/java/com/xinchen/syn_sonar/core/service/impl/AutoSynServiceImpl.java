@@ -15,7 +15,6 @@ import com.xinchen.syn_sonar.core.service.SonarService;
 import org.apache.http.auth.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -47,7 +46,7 @@ public class AutoSynServiceImpl implements AutoSynService {
     private BaseProfileRepository baseProfileRepository;
 
     @Override
-    public void synchronize(boolean synchronize) {
+    public void synchronize(boolean synchronize) throws Exception {
         try {
 
             // 获取本地
@@ -124,11 +123,12 @@ public class AutoSynServiceImpl implements AutoSynService {
                 }
             });
             // 记录操作日志
-//            autoSynLogRepository.save(new AutoSynLog(date));
+            autoSynLogRepository.save(new AutoSynLog(date));
 
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.error("检测失败：{}", e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 

@@ -19,7 +19,7 @@ public class AutoSynServiceTest extends SynSonarApplicationTests {
     private AutoSynService autoSynService;
 
     @Test
-    public void test(){
+    public void test() throws Exception {
         autoSynService.synchronize(true);
     }
 }
